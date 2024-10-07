@@ -8,6 +8,7 @@ async function connect() {
         await mongoose.connect(uri);
         console.log(
             `Connected to MongoDB with Mongoose to database ${mongoose.connection.name}`
+                .cyan.underline.bold
         );
     } catch (error) {
         console.error("Error connecting to database", error);
