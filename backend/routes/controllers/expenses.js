@@ -37,12 +37,32 @@ export const getOneExpense = async (req, res) => {
 export const addExpense = async (req, res) => {
     try {
         const data = req.body;
+        if (!data.category || !data.description || !data.amount) {
+            return res.status(400).send({
+                error: "Description, category and amount are required fields",
+            });
+        }
+        if (isNaN(data.amount)) {
+            return res.status(400).send({
+                error: "Amount must be a number",
+            });
+        }
         const categoryName = data.category;
-        const { _id } = await Category.findOne({ name: categoryName });
-        const newExpense = await Expense.create({ ...data, category_id: _id });
+        const categoryFind = await Category.findOne({ name: categoryName });
+        if (!categoryFind) {
+            // const { _id } = await Category.findOne({ name: categoryName });
+            // if (!_id) {
+            return res
+                .status(404)
+                .send({ error: `Category ${categoryName} not found` });
+        }
+        const newExpense = await Expense.create({
+            ...data,
+            category_id: categoryFind._id,
+        });
         // console.log(`newExpense: ${newExpense}`.cyan);
-        res.send({
-            message: "new expense was added: ",
+        return res.send({
+            message: "New expense was added: ",
             expense: newExpense,
         });
     } catch (error) {

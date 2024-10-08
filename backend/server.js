@@ -2,11 +2,13 @@ import express from "express";
 import connect from "./lib/db.js";
 import expensesRouter from "./routes/expencesRouter.js";
 import colors from "colors";
+import morgan from "morgan";
 
 await connect();
 const app = express();
 app.use(express.json());
 
+app.use(morgan("dev"));
 app.use("/expenses", expensesRouter);
 
 const port = 3001;
