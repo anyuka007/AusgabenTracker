@@ -8,10 +8,14 @@ export const getAllExpenses = async (req, res) => {
     try {
         const allExp = await Expense.find({});
         // console.log(`allExp ${allExp}`.cyan);
-        res.send(allExp);
+        res.send({
+            success: true,
+            count: `There are ${allExp.length} expenses`,
+            allExpences: allExp,
+        });
     } catch (error) {
         console.error(`Error getting all Expenses: ${error}`.red);
-        res.status(500).send({
+        return res.status(500).send({
             error: "An error occurred while fetching expenses",
         });
     }
@@ -24,13 +28,18 @@ export const getOneExpense = async (req, res) => {
     }
     try {
         const expense = await Expense.findById(id);
+        console.log("expense getOne", expense);
         if (!expense) {
             console.log("Expense is not found".red);
             return res.status(404).send("Expense is not found");
         }
-        res.send(expense);
+        res.send({
+            message: `Expense '${expense.description}' was successfully fetched`,
+            result: expense,
+        });
     } catch (error) {
         console.error(`Error: ${error}`.red);
+        return res.status(500).send(error);
     }
 };
 
@@ -54,7 +63,7 @@ export const addExpense = async (req, res) => {
             // if (!_id) {
             return res
                 .status(404)
-                .send({ error: `Category ${categoryName} not found` });
+                .send({ error: `Category '${categoryName}' not found` });
         }
         const newExpense = await Expense.create({
             ...data,
@@ -62,12 +71,12 @@ export const addExpense = async (req, res) => {
         });
         // console.log(`newExpense: ${newExpense}`.cyan);
         return res.send({
-            message: "New expense was added: ",
+            message: "New expense was  successfully added: ",
             expense: newExpense,
         });
     } catch (error) {
         console.error(`Error adding new expense: ${error}`.red);
-        res.status(500).send({
+        return res.status(500).send({
             error: "An error occurred while adding expense",
         });
     }
@@ -86,9 +95,11 @@ export const deleteExpense = async (req, res) => {
             return res.status(404).send("Expense is not found");
         }
         await Expense.deleteOne(expense);
-        res.send(`Expense ${expense.description} was successfully deleted`);
+        res.send(`Expense '${expense.description}' was successfully deleted`);
     } catch (error) {
         console.error(`Error: ${error}`.red);
-        res.status(500).send("An error occurred while deleting the expense");
+        return res
+            .status(500)
+            .send("An error occurred while deleting the expense");
     }
 };
