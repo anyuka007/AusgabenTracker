@@ -6,179 +6,67 @@ export const getAllExpenses = async (req, res) => {
     try {
         const { category, month, year } = req.query;
         let query = Expense.find();
-        if (category || month || year) {
-            const findCategory = category
-                ? await Category.findOne({
-                      name: category,
-                  })
-                : null;
+
+        if (category) {
+            const findCategory = await Category.findOne({
+                name: category,
+            });
+
             if (category && !findCategory) {
                 return res.status(404).send(`Category ${category} not found`);
             }
-            const categoryId = findCategory ? findCategory._id : null;
 
-            const monthNumber = month ? Number(month) - 1 : null; // Convert month to zero-based index
-            const currentYear = month ? new Date().getFullYear() : null;
-            const monthStartDate = month
-                ? new Date(currentYear, monthNumber, 1)
-                : null;
-            const monthEndDate = month
-                ? new Date(currentYear, monthNumber + 1, 1)
-                : null;
-
-            const yearStartDate = year ? new Date(year, 0, 1) : null;
-            const yearEndDate = year ? new Date(year, 11, 31) : null;
-
-            if (category && month && year) {
-                const allExp = await query
-                    /* .find({}) */
-                    .where("category_id")
-                    .equals([categoryId])
-                    .where({
-                        $and: [
-                            {
-                                date: {
-                                    $gte: monthStartDate,
-                                    $lte: monthEndDate,
-                                },
-                            },
-                            {
-                                date: {
-                                    $gte: yearStartDate,
-                                    $lte: yearEndDate,
-                                },
-                            },
-                        ],
-                    });
-                /* const allExp = await query
-                    .find({
-                        category_id: categoryId,
-                        $and: [
-                            { date: { $gte: monthStartDate, $lte: monthEndDate } },
-                            { date: { $gte: yearStartDate, $lte: yearEndDate } }
-                        ]
-                    }); */
-                console.log(
-                    `There are ${
-                        allExp.length.toString().brightMagenta
-                    } expense(s) in category ${category.brightMagenta} in ${
-                        month.brightMagenta
-                    } month in ${year.brightMagenta} year`
-                );
-                res.send(allExp);
-            } else if (category && month) {
-                const allExp = await query
-                    .find({
-                        category_id: categoryId,
-                    })
-                    .where("date")
-                    .gte(monthStartDate)
-                    .lte(monthEndDate);
-                console.log(
-                    `There are ${
-                        allExp.length.toString().brightMagenta
-                    } expense(s) in category ${category.brightMagenta} in ${
-                        month.brightMagenta
-                    } month`
-                );
-                res.send(allExp);
-            } else if (category && year) {
-                const allExp = await query.find({
-                    category_id: categoryId,
-                    date: { $gte: yearStartDate, $lte: yearEndDate },
-                });
-
-                console.log(
-                    `There are ${
-                        allExp.length.toString().brightMagenta
-                    } expense(s) in category ${category.brightMagenta} in ${
-                        year.brightMagenta
-                    } year`
-                );
-                res.send(allExp);
-            } else if (month && year) {
-                const allExp = await query.find({
-                    $and: [
-                        { date: { $gte: monthStartDate, $lte: monthEndDate } },
-                        { date: { $gte: yearStartDate, $lte: yearEndDate } },
-                    ],
-                });
-
-                console.log(
-                    `There are ${
-                        allExp.length.toString().brightMagenta
-                    } expense(s) in ${month.brightMagenta} month in ${
-                        year.brightMagenta
-                    } year`
-                );
-                res.send(allExp);
-            } else if (category) {
-                /* const findCategory = await Category.findOne({
-                    name: category,
-                }); */
-
-                /* if (category && !findCategory) {
-                    return res
-                        .status(404)
-                        .send(`Category ${category} not found`);
-                } */
-
-                /* const categoryId = findCategory._id; */
-
-                const allExp = await query.find({ category_id: categoryId });
-                /* .where("category_id")
-                    .equals([categoryId]); */
-                console.log(
-                    `There are ${
-                        allExp.length.toString().brightMagenta
-                    } expense(s) in category ${category.brightMagenta}`
-                );
-                res.send(allExp);
-            } else if (month) {
-                //console.log("month", month);
-
-                /* const monthNumber = Number(month) - 1; // Convert month to zero-based index
-                const currentYear = new Date().getFullYear();
-                const monthStartDate = new Date(currentYear, monthNumber, 1);
-                const monthEndDate = new Date(currentYear, monthNumber + 1, 1); */
-
-                const allExp = await query
-                    .find({})
-                    .where("date")
-                    .gte(monthStartDate)
-                    .lte(monthEndDate);
-                console.log(
-                    `There are ${
-                        allExp.length.toString().brightMagenta
-                    } expenses in ${month.brightMagenta} month`
-                );
-                res.send(allExp);
-            } else if (year) {
-                // console.log("year", year);
-
-                /* const yearStartDate = new Date(year, 0, 1);
-                const yearEndDate = new Date(year, 11, 31); */
-
-                const allExp = await query
-                    .find({})
-                    .where("date")
-                    .gte(yearStartDate)
-                    .lte(yearEndDate);
-
-                console.log(
-                    `There are ${
-                        allExp.length.toString().brightMagenta
-                    } expenses in ${year.brightMagenta} year`
-                );
-                res.send(allExp);
-            }
-        } else {
-            const allExp = await query.find({});
-            console.log(
-                `There are ${allExp.length.toString().brightMagenta} expense(s)`
-            );
-            res.send(allExp);
+            const categoryId = findCategory._id;
+            query = query.where("category_id").equals([categoryId]);
         }
+        let monthCondition = undefined;
+        if (month) {
+            const monthNumber = Number(month) - 1; // Convert month to zero-based index
+            const currentYear = new Date().getFullYear();
+            const monthStartDate = new Date(
+                year || currentYear,
+                monthNumber,
+                1
+            );
+            const monthEndDate = new Date(
+                year || currentYear,
+                monthNumber + 1,
+                1
+            );
+
+            monthCondition = {
+                date: { $gte: monthStartDate, $lte: monthEndDate },
+            };
+        }
+        let yearCondition = undefined;
+        if (year) {
+            const yearStartDate = new Date(year, 0, 1);
+            const yearEndDate = new Date(year, 11, 31);
+
+            yearCondition = {
+                date: { $gte: yearStartDate, $lte: yearEndDate },
+            };
+        }
+        if (month && year) {
+            query = query.and([monthCondition, yearCondition]);
+        } else if (month || year) {
+            query = query.where(monthCondition || yearCondition);
+        }
+        const allExp = await query.exec();
+        let message = `There are ${
+            allExp.length.toString().brightMagenta
+        } expence(s)`;
+        if (category) {
+            message += ` in ${category.brightMagenta} category`;
+        }
+        if (month) {
+            message += ` in ${month.brightMagenta} month`;
+        }
+        if (year) {
+            message += ` in ${year.brightMagenta} year`;
+        }
+        console.log(message);
+        res.send(allExp);
     } catch (error) {
         console.error(`Error getting Expenses: ${error}`.red);
         return res.status(500).send({
