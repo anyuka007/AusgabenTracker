@@ -4,45 +4,71 @@ import Expense from "../../models/Expense.js";
 
 export const getAllExpenses = async (req, res) => {
     try {
-        const { categoryFilter } = req.query;
-        // console.log("category Filter", categoryFilter);
-        // console.log("req.query", req.query);
-
+        const { categoryFilter, month, year } = req.query;
         let query = Expense.find();
         if (categoryFilter) {
             const findCategory = await Category.findOne({
                 name: categoryFilter,
             });
-            // console.log("find CategoryFilter in Category", findCategory);
-
             if (categoryFilter && !findCategory) {
                 return res
                     .status(404)
                     .send(`Category ${categoryFilter} not found`);
             }
             const categoryId = findCategory._id;
-            // console.log("findCategoryID", categoryId);
-            // console.log("!categoryFilter", !categoryFilter);
-            /*  const expencesInCategory = await Expense.find({
-                category_id: categoryId,
-            }); */
-            const expencesInCategory = await query
+
+            const allExp = await query
                 .find({})
                 .where("category_id")
                 .equals([categoryId]);
-            res.send({
-                success: true,
-                count: `There are ${expencesInCategory.length} expenses in category ${categoryFilter}`,
-                filteredExpences: expencesInCategory,
-            });
+            console.log(
+                `There are ${
+                    allExp.length.toString().brightMagenta
+                } expense(s) in category ${categoryFilter.brightMagenta}`
+            );
+            res.send(allExp);
+        } else if (month) {
+            console.log("month", month);
+            const monthNumber = Number(month) - 1; // Convert month to zero-based index
+            const currentYear = new Date().getFullYear();
+            const startDate = new Date(currentYear, monthNumber, 1);
+            const endDate = new Date(currentYear, monthNumber + 1, 1);
+
+            const allExp = await query
+                .find({})
+                .where("date")
+                .gte(startDate)
+                .lte(endDate);
+            console.log(
+                `There are ${
+                    allExp.length.toString().brightMagenta
+                } expenses in ${month.brightMagenta} month`
+            );
+            res.send(allExp);
+        } else if (year) {
+            console.log("year", year);
+
+            const startDate = new Date(year, 0, 1);
+            const endDate = new Date(year, 11, 31);
+
+            const allExp = await query
+                .find({})
+                .where("date")
+                .gte(startDate)
+                .lte(endDate);
+
+            console.log(
+                `There are ${
+                    allExp.length.toString().brightMagenta
+                } expenses in ${year.brightMagenta} year`
+            );
+            res.send(allExp);
         } else {
             const allExp = await query.find({});
-            // console.log(`allExp ${allExp}`.cyan);
-            res.send({
-                success: true,
-                count: `There are ${allExp.length} expenses`,
-                allExpences: allExp,
-            });
+            console.log(
+                `There are ${allExp.length.toString().brightMagenta} expense(s)`
+            );
+            res.send(allExp);
         }
     } catch (error) {
         console.error(`Error getting all Expenses: ${error}`.red);
@@ -59,15 +85,23 @@ export const getOneExpense = async (req, res) => {
     }
     try {
         const expense = await Expense.findById(id);
-        console.log("expense getOne", expense);
         if (!expense) {
             console.log("Expense is not found".red);
             return res.status(404).send("Expense is not found");
         }
-        res.send({
-            message: `Expense '${expense.description}' was successfully fetched`,
-            result: expense,
-        });
+        console.log(
+            `Expense '${expense.description.brightMagenta}' was successfully ${
+                "fetched".brightMagenta
+            }`
+        );
+        const date = new Date(expense.date);
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const day = date.getDate();
+        console.log("year", year);
+        console.log("month", month + 1);
+        console.log("day", day);
+        return res.send(expense);
     } catch (error) {
         console.error(`Error: ${error}`.red);
         return res.status(500).send(error);
@@ -98,11 +132,12 @@ export const addExpense = async (req, res) => {
             ...data,
             category_id: categoryFind._id,
         });
-        // console.log(`newExpense: ${newExpense}`.cyan);
-        return res.status(201).send({
-            message: "New expense was  successfully added: ",
-            expense: newExpense,
-        });
+        console.log(
+            `New expense '${
+                newExpense.description.brightMagenta
+            }' was  successfully ${"added".brightMagenta}`
+        );
+        return res.status(201).send(newExpense);
     } catch (error) {
         console.error(`Error adding new expense: ${error}`.red);
         return res.status(500).send({
@@ -123,7 +158,12 @@ export const deleteExpense = async (req, res) => {
             return res.status(404).send("Expense not found");
         }
         await Expense.deleteOne(expense);
-        res.send(`Expense '${expense.description}' was successfully deleted`);
+        console.log(
+            `Expense '${expense.description.brightMagenta}' was successfully ${
+                "deleted".brightMagenta
+            }`
+        );
+        res.send({ success: true });
     } catch (error) {
         console.error(`Error: ${error}`.red);
         return res
@@ -152,10 +192,12 @@ export const editExpense = async (req, res) => {
         }
         await Expense.updateOne({ _id: id }, data);
         const updatedExpense = await Expense.findById(id);
-        return res.send({
-            message: "The expense was successfully updated",
-            expense: updatedExpense,
-        });
+        console.log(
+            `The expense ${
+                expenseToUpdate.description.brightMagenta
+            } was successfully ${"updated".brightMagenta}`
+        );
+        return res.send(updatedExpense);
     } catch (error) {
         console.log("Error updating an expense: ", error);
         return res.status(500).send(error);
