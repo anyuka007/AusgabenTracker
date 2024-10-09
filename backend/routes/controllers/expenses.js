@@ -4,13 +4,46 @@ import Expense from "../../models/Expense.js";
 
 export const getAllExpenses = async (req, res) => {
     try {
-        const allExp = await Expense.find({});
-        // console.log(`allExp ${allExp}`.cyan);
-        res.send({
-            success: true,
-            count: `There are ${allExp.length} expenses`,
-            allExpences: allExp,
-        });
+        const { categoryFilter } = req.query;
+        // console.log("category Filter", categoryFilter);
+        // console.log("req.query", req.query);
+
+        let query = Expense.find();
+        if (categoryFilter) {
+            const findCategory = await Category.findOne({
+                name: categoryFilter,
+            });
+            // console.log("find CategoryFilter in Category", findCategory);
+
+            if (categoryFilter && !findCategory) {
+                return res
+                    .status(404)
+                    .send(`Category ${categoryFilter} not found`);
+            }
+            const categoryId = findCategory._id;
+            // console.log("findCategoryID", categoryId);
+            // console.log("!categoryFilter", !categoryFilter);
+            /*  const expencesInCategory = await Expense.find({
+                category_id: categoryId,
+            }); */
+            const expencesInCategory = await query
+                .find({})
+                .where("category_id")
+                .equals([categoryId]);
+            res.send({
+                success: true,
+                count: `There are ${expencesInCategory.length} expenses in category ${categoryFilter}`,
+                filteredExpences: expencesInCategory,
+            });
+        } else {
+            const allExp = await query.find({});
+            // console.log(`allExp ${allExp}`.cyan);
+            res.send({
+                success: true,
+                count: `There are ${allExp.length} expenses`,
+                allExpences: allExp,
+            });
+        }
     } catch (error) {
         console.error(`Error getting all Expenses: ${error}`.red);
         return res.status(500).send({
