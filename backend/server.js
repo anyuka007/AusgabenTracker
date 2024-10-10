@@ -4,6 +4,7 @@ import expensesRouter from "./routes/expencesRouter.js";
 import totalRouter from "./routes/totalRouter.js";
 import colors from "colors";
 import morgan from "morgan";
+import categoriesRouter from "./routes/categoriesRouter.js";
 
 await connect();
 const app = express();
@@ -13,6 +14,7 @@ app.use(morgan("dev"));
 
 app.use("/expenses/total", totalRouter);
 app.use("/expenses", expensesRouter);
+app.use("/categories", categoriesRouter);
 
 const port = 3001;
 app.listen(port, () => {
