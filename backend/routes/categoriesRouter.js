@@ -1,8 +1,14 @@
 import express from "express";
-import { getCategories } from "./controllers/categories.js";
+import {
+    addCategory,
+    deleteCategory,
+    getCategories,
+    getOneCategory,
+} from "./controllers/categories.js";
 
 const categoriesRouter = express.Router();
 
-categoriesRouter.route("/").get(getCategories);
+categoriesRouter.route("/").get(getCategories).post(addCategory);
+categoriesRouter.route("/:id").get(getOneCategory).delete(deleteCategory);
 
 export default categoriesRouter;
