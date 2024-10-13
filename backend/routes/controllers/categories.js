@@ -75,11 +75,15 @@ export const addCategory = async (req, res) => {
 export const deleteCategory = async (req, res) => {
     try {
         const id = req.params.id;
-        console.log("id ", id);
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).send("Invalid category ID");
+        }
         const categoryToDelete = await Category.findById(id);
-        console.log("categoryToDelete", categoryToDelete);
+        if (!categoryToDelete) {
+            console.log("Category not found".red);
+            return res.status(404).send("Category is not found");
+        }
         const expencesInCategory = await Expense.find({ category_id: id });
-        console.log("exencesInCategory ", expencesInCategory);
         if (expencesInCategory.length === 0) {
             await Category.deleteOne(categoryToDelete);
             console.log(
