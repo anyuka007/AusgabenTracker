@@ -5,7 +5,17 @@ import Expense from "../../models/Expense.js";
 export const getAllExpenses = async (req, res) => {
     try {
         const { category, month, year } = req.query;
-        let query = Expense.find();
+        const limit = Number(req.query.limit) || 0;
+        const currentPage = Number(req.query.currentPage) || 1;
+        const skip = (currentPage - 1) * limit;
+        const sortDirection = req.query.sortDirection === "asc" ? 1 : -1;
+        const sortField = req.query.sortBy;
+
+        let query = Expense.find()
+            .limit(limit)
+            .skip(skip)
+            .sort({ [sortField]: sortDirection })
+            .populate({ path: "category_id", select: "_id name" });
 
         if (category) {
             const findCategory = await Category.findOne({
