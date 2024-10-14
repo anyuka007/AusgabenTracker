@@ -65,20 +65,20 @@ export const getAllExpenses = async (req, res) => {
         const allExp = await query.exec();
         let message = `There are ${
             allExp.length.toString().brightMagenta
-        } expence(s)`;
+        } expense(s)`;
         if (category) {
-            message += ` in ${category.brightMagenta} category`;
+            message += ` in ${category.brightMagenta} the category`;
         }
         if (month) {
-            message += ` in ${month.brightMagenta} month`;
+            message += ` in ${month.brightMagenta} the month`;
         }
         if (year) {
-            message += ` in ${year.brightMagenta} year`;
+            message += ` in ${year.brightMagenta} the year`;
         }
         console.log(message);
         res.send(allExp);
     } catch (error) {
-        console.error(`Error getting Expenses: ${error}`.red);
+        console.error(`Error getting expenses: ${error}`.red);
         return res.status(500).send({
             error: "An error occurred while fetching expenses",
         });
@@ -93,21 +93,14 @@ export const getOneExpense = async (req, res) => {
     try {
         const expense = await Expense.findById(id);
         if (!expense) {
-            console.log("Expense is not found".red);
-            return res.status(404).send("Expense is not found");
+            console.log("Expense not found".red);
+            return res.status(404).send("Expense not found");
         }
         console.log(
             `Expense '${expense.description.brightMagenta}' was successfully ${
                 "fetched".brightMagenta
             }`
         );
-        const date = new Date(expense.date);
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const day = date.getDate();
-        console.log("year", year);
-        console.log("month", month + 1);
-        console.log("day", day);
         return res.send(expense);
     } catch (error) {
         console.error(`Error: ${error}`.red);
@@ -125,7 +118,7 @@ export const addExpense = async (req, res) => {
         }
         if (isNaN(data.amount)) {
             return res.status(400).send({
-                error: "Amount must be a number",
+                error: "The amount must be a number",
             });
         }
         const categoryName = data.category;
@@ -148,7 +141,7 @@ export const addExpense = async (req, res) => {
     } catch (error) {
         console.error(`Error adding new expense: ${error}`.red);
         return res.status(500).send({
-            error: "An error occurred while adding expense",
+            error: "An error occurred while adding the expense",
         });
     }
 };
@@ -161,7 +154,7 @@ export const deleteExpense = async (req, res) => {
     try {
         const expense = await Expense.findById(id);
         if (!expense) {
-            console.log("Expense is not found".red);
+            console.log("Expense not found".red);
             return res.status(404).send("Expense not found");
         }
         await Expense.deleteOne(expense);
@@ -194,7 +187,7 @@ export const editExpense = async (req, res) => {
         }
         const expenseToUpdate = await Expense.findById(id);
         if (!expenseToUpdate) {
-            console.log("Expense is not found".red);
+            console.log("Expense not found".red);
             return res.status(404).send("Expense not found");
         }
         await Expense.updateOne({ _id: id }, data);
