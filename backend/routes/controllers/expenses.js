@@ -10,7 +10,7 @@ export const getAllExpenses = async (req, res) => {
         const currentPage = Number(req.query.currentPage) || 1;
         const skip = (currentPage - 1) * limit;
         const sortDirection = req.query.sortDirection === "asc" ? 1 : -1;
-        const sortField = req.query.sortBy;
+        const sortField = req.query.sortBy || "date";
 
         // Initialize the query with pagination and sorting
         let query = Expense.find()

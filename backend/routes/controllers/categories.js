@@ -8,8 +8,8 @@ export const getCategories = async (req, res) => {
         const limit = Number(req.query.limit) || 0;
         const currentPage = Number(req.query.currentPage) || 1;
         const skip = (currentPage - 1) * limit;
-        const sortDirection = req.query.sortDirection === "asc" ? 1 : -1;
-        const sortField = req.query.sortBy;
+        const sortDirection = req.query.sortDirection === "desc" ? -1 : 1;
+        const sortField = req.query.sortBy || "name";
 
         // Fetch categories from the database with the specified limit, skip, and sort options
         const categories = await Category.find()
@@ -133,6 +133,7 @@ export const editCategory = async (req, res) => {
     try {
         // Fetch the category to update from the database using the ID
         const categoryToUpdate = await Category.findById(id);
+        //console.log("categoryToUpdate", categoryToUpdate);
         if (!categoryToUpdate) {
             console.log("Category not found".red);
             return res.status(404).send("Category not found");
@@ -142,11 +143,13 @@ export const editCategory = async (req, res) => {
             console.log("Name is required".red);
             return res.status(400).send("Name is required");
         }
+        //console.log("body", body);
 
         // Update the category in the database with the provided body
         await Category.updateOne(body);
         // Fetch the updated category from the database
         const updatedCategory = await Category.findById(id);
+        //console.log("upd categ", updatedCategory);
         console.log(
             `Category ${categoryToUpdate.name.brightMagenta} successfully ${
                 "updated".brightMagenta
