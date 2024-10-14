@@ -236,3 +236,15 @@ export const editExpense = async (req, res) => {
         return res.status(500).send(error);
     }
 };
+
+/*
+{
+"description" : "Buch 'Clean Code'", 
+"category": "Bildung",
+"amount": 17
+}
+ */
+
+/*
+{ "date": "2024-02-07"}
+*/
