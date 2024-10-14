@@ -54,11 +54,11 @@ export const getTotal = async (req, res) => {
         } else if (month) {
             // Nur Monat
             match.date = monthMatch;
-            console.log("monthMatch", match);
+            //console.log("monthMatch", match);
         } else if (year) {
             // Nur Jahr
             match.date = yearMatch;
-            console.log("yearMatch", match);
+            //console.log("yearMatch", match);
         }
 
         // Aggregation
@@ -73,7 +73,7 @@ export const getTotal = async (req, res) => {
                 (total[0]?.total || 0).toString().magenta
             }`
         );
-        res.json(total[0]);
+        res.json(total[0]?.total || 0);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
