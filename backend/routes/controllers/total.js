@@ -73,7 +73,7 @@ export const getTotal = async (req, res) => {
                 (total[0]?.total || 0).toString().magenta
             }`
         );
-        res.json(total);
+        res.json(total[0]);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

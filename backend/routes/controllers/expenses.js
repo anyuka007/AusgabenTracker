@@ -4,6 +4,7 @@ import Expense from "../../models/Expense.js";
 
 export const getAllExpenses = async (req, res) => {
     try {
+        // Extract query parameters from the request
         const { category, month, year } = req.query;
         const limit = Number(req.query.limit) || 0;
         const currentPage = Number(req.query.currentPage) || 1;
@@ -11,12 +12,14 @@ export const getAllExpenses = async (req, res) => {
         const sortDirection = req.query.sortDirection === "asc" ? 1 : -1;
         const sortField = req.query.sortBy;
 
+        // Initialize the query with pagination and sorting
         let query = Expense.find()
             .limit(limit)
             .skip(skip)
             .sort({ [sortField]: sortDirection })
             .populate({ path: "category_id", select: "_id name" });
 
+        // Filter by category if provided
         if (category) {
             const findCategory = await Category.findOne({
                 name: category,
@@ -29,6 +32,8 @@ export const getAllExpenses = async (req, res) => {
             const categoryId = findCategory._id;
             query = query.where("category_id").equals([categoryId]);
         }
+
+        // Filter by month if provided
         let monthCondition = undefined;
         if (month) {
             const monthNumber = Number(month) - 1; // Convert month to zero-based index
@@ -48,6 +53,8 @@ export const getAllExpenses = async (req, res) => {
                 date: { $gte: monthStartDate, $lte: monthEndDate },
             };
         }
+
+        // Filter by year if provided
         let yearCondition = undefined;
         if (year) {
             const yearStartDate = new Date(year, 0, 1);
@@ -57,12 +64,18 @@ export const getAllExpenses = async (req, res) => {
                 date: { $gte: yearStartDate, $lte: yearEndDate },
             };
         }
+
+        // Filter by year+month if provided
         if (month && year) {
             query = query.and([monthCondition, yearCondition]);
         } else if (month || year) {
             query = query.where(monthCondition || yearCondition);
         }
+
+        // Execute the query
         const allExp = await query.exec();
+
+        // Log the result message
         let message = `There are ${
             allExp.length.toString().brightMagenta
         } expense(s)`;
@@ -76,6 +89,8 @@ export const getAllExpenses = async (req, res) => {
             message += ` in ${year.brightMagenta} the year`;
         }
         console.log(message);
+
+        // Send the response with the expenses
         res.send(allExp);
     } catch (error) {
         console.error(`Error getting expenses: ${error}`.red);
@@ -87,10 +102,12 @@ export const getAllExpenses = async (req, res) => {
 
 export const getOneExpense = async (req, res) => {
     const id = req.params.id;
+    // Check if the provided ID is valid
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).send("Invalid expense ID");
     }
     try {
+        // Find the expense by ID
         const expense = await Expense.findById(id);
         if (!expense) {
             console.log("Expense not found".red);
@@ -111,23 +128,30 @@ export const getOneExpense = async (req, res) => {
 export const addExpense = async (req, res) => {
     try {
         const data = req.body;
+
+        // Check if required fields are present
         if (!data.category || !data.description || !data.amount) {
             return res.status(400).send({
                 error: "Description, category and amount are required fields",
             });
         }
+        // Check if the amount is a valid number
         if (isNaN(data.amount)) {
             return res.status(400).send({
                 error: "The amount must be a number",
             });
         }
         const categoryName = data.category;
+
+        // Find the category by name
         const categoryFind = await Category.findOne({ name: categoryName });
         if (!categoryFind) {
             return res
                 .status(404)
                 .send({ error: `Category '${categoryName}' not found` });
         }
+
+        // Create a new expense with the provided data and found category ID
         const newExpense = await Expense.create({
             ...data,
             category_id: categoryFind._id,
@@ -148,15 +172,19 @@ export const addExpense = async (req, res) => {
 
 export const deleteExpense = async (req, res) => {
     const id = req.params.id;
+    // Check if the provided ID is valid
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).send("Invalid expense ID");
     }
     try {
+        // Find the expense by ID
         const expense = await Expense.findById(id);
         if (!expense) {
             console.log("Expense not found".red);
             return res.status(404).send("Expense not found");
         }
+
+        // Delete the found expense
         await Expense.deleteOne(expense);
         console.log(
             `Expense '${expense.description.brightMagenta}' was successfully ${
@@ -174,22 +202,27 @@ export const deleteExpense = async (req, res) => {
 
 export const editExpense = async (req, res) => {
     const id = req.params.id;
+
+    // Check if the provided ID is valid
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).send("Invalid expense ID");
     }
     try {
         const data = req.body;
-        // console.log("dataUpdate", data);
+        // Check if the request body contains data to update
         if (!data || Object.keys(data).length === 0) {
             return res
                 .status(400)
                 .send("Please provide data to update the expense");
         }
+        // Find the expense by ID
         const expenseToUpdate = await Expense.findById(id);
         if (!expenseToUpdate) {
             console.log("Expense not found".red);
             return res.status(404).send("Expense not found");
         }
+
+        // Update the expense with the provided data
         await Expense.updateOne({ _id: id }, data);
         const updatedExpense = await Expense.findById(id);
         console.log(
