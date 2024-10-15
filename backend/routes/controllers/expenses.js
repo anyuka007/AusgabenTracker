@@ -80,13 +80,13 @@ export const getAllExpenses = async (req, res) => {
             allExp.length.toString().brightMagenta
         } expense(s)`;
         if (category) {
-            message += ` in ${category.brightMagenta} the category`;
+            message += ` in the ${category.brightMagenta} category`;
         }
         if (month) {
-            message += ` in ${month.brightMagenta} the month`;
+            message += ` in the ${month.brightMagenta} month`;
         }
         if (year) {
-            message += ` in ${year.brightMagenta} the year`;
+            message += ` in the ${year.brightMagenta} year`;
         }
         console.log(message);
 
