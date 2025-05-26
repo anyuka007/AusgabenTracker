@@ -24,24 +24,24 @@ Mit dieser App ist es möglich Ausgaben nicht nur zu erstellen, zu ändern, zu l
 - **Database**: MongoDB (via Mongoose)
 
 
-Usage
+## Usage
 
-API Endpoints
+**API Endpoints**
 
-**Expenses**:
+***Expenses***:
 
-GET	/expenses - Get all expenses
-POST /expenses - Create a new expense
-PUT	/expenses/:id - Update an existing expense
-DELETE	/expenses/:id - Delete an expense
+- GET /expenses - Get all expenses
+- POST /expenses - Create a new expense
+- PUT /expenses/:id - Update an existing expense
+- DELETE /expenses/:id - Delete an expense
 
-**Category**:
+***Category***:
 
-GET	/categories - Get all categories
-POST /categories - Create a new category
-PUT	/categories/:id - Update an existing category
-DELETE	/categories/:id - Delete a category
+- GET /categories - Get all categories
+- POST /categories - Create a new category
+- PUT /categories/:id - Update an existing category
+- DELETE /categories/:id - Delete a category
 
-**Total**:
+***Total***:
 
-GET	/expenses/total - Get total of expenses 
+- GET /expenses/total - Get total of expenses 
