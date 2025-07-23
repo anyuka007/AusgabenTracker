@@ -45,3 +45,47 @@ Mit dieser App ist es möglich Ausgaben nicht nur zu erstellen, zu ändern, zu l
 ***Total***:
 
 - GET /expenses/total - Get total of expenses 
+
+
+## Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/anyuka007/AusgabenTracker.git
+   cd AusgabenTracker
+   ```
+
+2. **Navigate to the backend directory**
+   ```bash
+   cd backend
+   ```
+
+3. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+4. **Environment Configuration**
+   - Create a `.env` file in the backend directory
+   - Add the following environment variables:
+   ```env
+   PORT=3000
+   MONGODB_URI=mongodb://localhost:27017/ausgabentracker
+   # For MongoDB Atlas, use your connection string:
+   # MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/ausgabentracker
+   ```
+
+5. **Start MongoDB**
+   - For local MongoDB: Make sure MongoDB service is running
+   - For MongoDB Atlas: Ensure your connection string is correct in `.env`
+
+6. **Populate initial categories (optional)**
+   ```bash
+   node insertCategories.js
+   ```
+
+7. **Start the server**
+   ```bash
+   node server.js
+   ```
+
